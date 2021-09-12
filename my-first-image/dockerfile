@@ -1,0 +1,14 @@
+# Un dockerfile sirve para crear una imagen personalizada
+# y controlar paso a paso la construcción de las capas de la
+# imagen.
+# 
+# Por cada sentencia escrita (RUN, WORKDIR, etc.) se está creando
+# una capa nueva en la imagen.
+
+# Todo dockerfile está basada en una imagen de base, como por ejemplo
+# Debian, Red Hat, Ubuntu, etc.
+FROM ubuntu:latest
+
+# Ejecutando un comando. RUN se ejecuta en tiempo de build, es decir,
+# la imagen se creará con los comandos ya ejecutados.
+RUN touch /usr/src/hello-world.txt
