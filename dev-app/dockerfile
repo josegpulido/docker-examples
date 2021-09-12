@@ -1,0 +1,22 @@
+# Basando la imagen en Node 12
+FROM node:12
+
+# Copia todos los archivos de directorio donde se
+# encuetra dockerfile y los coloca en un directorio
+# del contenedor.
+# 
+# COPY acepta N elementos, y al final la ruta destino.
+COPY [".", "/usr/src/"]
+
+# Ubica a Docker en el directorio indicado
+WORKDIR /usr/src
+
+# Instala las dependencias del proyecto
+RUN npm install
+
+# Expone el puerto 3000 en el contenedor
+EXPOSE 3000
+
+# Establece el comando por sobre el que correrá el
+# contenedor permanentemente
+CMD ["node", "index.js"]

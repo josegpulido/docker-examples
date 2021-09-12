@@ -1,0 +1,11 @@
+{
+  "name": "dev-app",
+  "version": "1.0.0",
+  "description": "Simple app to handle with docker :)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "author": "José Pulido <memo.board.9999@gmail.com>",
+  "license": "ISC"
+}
