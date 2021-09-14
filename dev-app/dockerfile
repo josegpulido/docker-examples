@@ -1,18 +1,29 @@
 # Basando la imagen en Node 12
 FROM node:12
 
-# Copia todos los archivos de directorio donde se
-# encuetra dockerfile y los coloca en un directorio
-# del contenedor.
+# Copiar primero los package de las depedencias, porque
+# de ello dependerá si Docker detecta cambios en dichos
+# ficheros y entonces decidirá si reciclar o no la capa
+# posiblemente cacheada de RUN npm install.
 # 
 # COPY acepta N elementos, y al final la ruta destino.
-COPY [".", "/usr/src/"]
+COPY ["package.json", "package-lock.json", "/usr/src/"]
 
-# Ubica a Docker en el directorio indicado
+# Ubica a Docker en el directorio /usr/src
 WORKDIR /usr/src
 
-# Instala las dependencias del proyecto
+# Instala las dependencias del proyecto... reciclará
+# esta capa si no detectó cambios en la capa de COPY
 RUN npm install
+
+# Copia todos los archivos del directorio donde se
+# encuentra el contexto de Docker (dockerfile) hacia
+# la ruta especificada.
+# 
+# Docker no reescribirá los package.json porque ya se
+# dio cuenta que no hay cambios entre el COPY anterior
+# y este, así que los omite
+COPY [".", "/usr/src/"]
 
 # Expone el puerto 3000 en el contenedor
 EXPOSE 3000
@@ -20,3 +31,7 @@ EXPOSE 3000
 # Establece el comando por sobre el que correrá el
 # contenedor permanentemente
 CMD ["node", "index.js"]
+# En modo de desarrollo, interesa que nodemon se ejecute
+# para por rebuildear en tiempo real la imagen de Docker
+# y así compilar rápido
+# CMD ["npx", "nodemon", "index.js"]

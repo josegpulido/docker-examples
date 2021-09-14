@@ -1,11 +1,21 @@
 {
+
   "name": "dev-app",
   "version": "1.0.0",
   "description": "Simple app to handle with docker :)",
   "main": "index.js",
   "scripts": {
-    "start": "node ."
+    "serve": "nodemon .",
+    "start": "node .",
+    "docker:image:build": "docker build -t josegpulido/node:dev-app .",
+    "docker:run:serve": "docker run --rm -p 3000:3000 -v $()/index.js josegpulido/node:dev-app"
   },
   "author": "José Pulido <memo.board.9999@gmail.com>",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
 }
