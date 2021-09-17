@@ -30,8 +30,29 @@ EXPOSE 3000
 
 # Establece el comando por sobre el que correrá el
 # contenedor permanentemente
-CMD ["node", "index.js"]
+CMD ["npm", "run", "start"]
+
 # En modo de desarrollo, interesa que nodemon se ejecute
-# para por rebuildear en tiempo real la imagen de Docker
-# y así compilar rápido
-# CMD ["npx", "nodemon", "index.js"]
+# para poder rebuildear en tiempo real la imagen de Docker
+# y así compilar rápido.
+# --> CMD ["npx", "nodemon", "index.js"]
+# Recordar que npx es una forma de correr un comando del que
+# su dependencia no está instalada en el bash sino en el proyecto
+# de NPM mismo.
+
+# SHELL FORM vs EXEC FORM
+# El sig. comando es corrido por Docker como un comando hijo del
+# shell (es decir, como si fuese ./bin/sh -c <my_command>):
+# --> CMD npm run start
+# Mientras que al sig. comando Docker lo corre directamente sin
+# intermediar con shell:
+# --> CMD ["npm", "run", "start"]
+
+# Lo anterior se puede comprobar buildeando la imagen con ambos
+# comandos y ejecutando el comando $ docker exec <container_name> ps -ef
+# sobre el contenedor corriendo.}
+# Ahí se verá que en SHELL FORM, el comando
+# se presenta como un hijo del proceso de SHELL (lo que ignora el SIGTERM),
+# mientras que EXEC FORM al ser un proceso más del contenedor entonces
+# entiende el SIGTERM directamente. Esto es importante debido a cómo Docker
+# interactua con el contenedor al ejecutar Ctrl + C (Gracefull Exit).

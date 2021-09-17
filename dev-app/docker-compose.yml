@@ -1,0 +1,55 @@
+# Ojo, Docker Compose no está diseñado para buildear imágenes,
+# por lo que ese proceso aún se puede seguir automatizando a
+# través de NPM scripts. 
+
+# Versión del Docker Compose
+version: "3.8"
+
+# Un servicio ("service") puede contener uno o más
+# contenedores de la misma imagen.
+services:
+
+  # Nombre del contenedor, en este caso "my-db"
+  my-db:
+    # Imagen base del contenedor (inmutable)
+    image: mongo
+
+  my-app:
+    # En lugar de usar una imagen inmutable base de forma directa, Docker
+    # puede buildear la imagen cada vez que el Compose se arranque a partir
+    # de un contexto en el que se ubique un dockerfile.
+    build: . # <-- Pasandole el directorio actual (.) como contexto
+    # Valores a exportar como variables de entorno
+    environment:
+      MONGO_URL: "mongodb://my-db:27017/test"
+    # Le indica a docker que si el contenedor "my-db" no arranca, entonces
+    # tampoco arrancar a este contenedor. También le permite establecer un
+    # orden de ejecución entre todos los contenedores, arrancando a este
+    # contenedor después de "my-db".
+    depends_on:
+      - my-db
+    ports:
+      - "3000:3000"
+      # Al escalar servicios mediante Docker Compose con el flag --scale, será necesario
+      # indicarle a Docker que distintos puertos de la máquina anfitriona apuntarán a un mismo
+      # puerto de cada servicio. Por ejemplo, dos contenedores que expongan su puerto 3000, pero
+      # que para acceder al primero se conecte a host:3000 y para el segundo se conecte con host:3001:
+      - "3000-3001:3000"
+      # En dicho caso, luego habrá que configurar balanceadores de cargas para utilizar ambos servicios
+      # en un solo entrypoint.
+    # Montando un volúmen en la imagen para que cada vez que se corra un contenedor
+    # basado en dicha imagen, este escuche y refleje los cambios que ocurren en el directorio
+    # . hacia /usr/src.
+    volumes: 
+      - .:/usr/src # <-- Monta el directorio actual (.) en el directorio /usr/src del contenedor
+      - /usr/src/node_modules # <-- Ignorar montar el directorio de /node_modules en el volúmen
+      # Lo anterior porque la imagen que se buildea (my-app) y su dockerfile establece que la imagen
+      # no hará RUN NPM INSTALL si no detectó cambios recientes al crear la imagen (consulta de caché),
+      # y cuando se rebuildee, el caché dirá que no hay cambios cuando en realidad todo el volúmen
+      # completo volvió a montarse desde cero.
+    # Por último, cuando el contenedor detecte que los archivos del directorio /usr/src cambien, entonces
+    # el servidor de Express se vuelva a iniciar (nodemon). Para lograr lo anterior, es conveniente
+    # configurar un script de NPM que corra a nodemon, y que dicho script corra apenas arranque el
+    # contenedor.
+    command: "npm run serve"
+    
