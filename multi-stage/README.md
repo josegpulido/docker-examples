@@ -1,0 +1,1 @@
+Este programa hace un conteo cada segundo del 1 al 50, y luego el script termina.
