@@ -1,4 +1,10 @@
 # Basando la imagen en Node 12
+# 
+# Como buena práctica de DevOps, fijar siempre versiones
+# específicas y puntuales de una imagen, ya que si esta imagen
+# recibe cambios o actualizaciones que, en este caso un servidor
+# de Express, el código de la aplicación no espera entonces
+# se podrán generar bugs y comportamiento indeseado.
 FROM node:12
 
 # Copiar primero los package de las depedencias, porque
@@ -12,8 +18,16 @@ COPY ["package.json", "package-lock.json", "/usr/src/"]
 # Ubica a Docker en el directorio /usr/src
 WORKDIR /usr/src
 
-# Instala las dependencias del proyecto... reciclará
-# esta capa si no detectó cambios en la capa de COPY
+# Instala las dependencias del proyecto. Reciclará esta
+# capa si no detectó cambios en la capa de COPY.
+# 
+# Esto viene a representar otra buena práctica de DevOps,
+# ya que es omite volver a descargar dependencias potencialmente
+# diferentes al momento de reconstruir la imagen, pues NPM suele
+# listar las depedencias usando un versionado semántico que permita
+# cambios en al menos minor changes, como ^1.8.2.
+# 
+# Ver apuntes de NPM para complementar.
 RUN npm install
 
 # Copia todos los archivos del directorio donde se
@@ -21,8 +35,8 @@ RUN npm install
 # la ruta especificada.
 # 
 # Docker no reescribirá los package.json porque ya se
-# dio cuenta que no hay cambios entre el COPY anterior
-# y este, así que los omite
+# dio cuenta que no hay cambios entre el COPY de la
+# línea 15 y este, así que los omite
 COPY [".", "/usr/src/"]
 
 # Expone el puerto 3000 en el contenedor
@@ -34,25 +48,31 @@ CMD ["npm", "run", "start"]
 
 # En modo de desarrollo, interesa que nodemon se ejecute
 # para poder rebuildear en tiempo real la imagen de Docker
-# y así compilar rápido.
+# y así compilar rápido, por lo que una forma de solucionar lo
+# anterior es la siguiente:
 # --> CMD ["npx", "nodemon", "index.js"]
 # Recordar que npx es una forma de correr un comando del que
 # su dependencia no está instalada en el bash sino en el proyecto
 # de NPM mismo.
 
 # SHELL FORM vs EXEC FORM
-# El sig. comando es corrido por Docker como un comando hijo del
-# shell (es decir, como si fuese ./bin/sh -c <my_command>):
+# El sig. formato es corrido por Docker como un comando hijo del
+# shell (es decir, como si fuese $ bash -c <my_command>):
+# + SHELL FORM:
 # --> CMD npm run start
-# Mientras que al sig. comando Docker lo corre directamente sin
+# 
+# Mientras que el sig. formato es corrido por Docker directamente sin
 # intermediar con shell:
+# + EXEC FORM:
 # --> CMD ["npm", "run", "start"]
 
 # Lo anterior se puede comprobar buildeando la imagen con ambos
 # comandos y ejecutando el comando $ docker exec <container_name> ps -ef
-# sobre el contenedor corriendo.}
-# Ahí se verá que en SHELL FORM, el comando
-# se presenta como un hijo del proceso de SHELL (lo que ignora el SIGTERM),
-# mientras que EXEC FORM al ser un proceso más del contenedor entonces
+# sobre el contenedor corriendo. Entonces podrá notarse que:
+# 
+# - En SHELL FORM, el comando se presenta como un hijo del proceso de
+# SHELL (lo que ignora el SIGTERM).
+# 
+# - En EXEC FORM, al ser un proceso más del contenedor entonces
 # entiende el SIGTERM directamente. Esto es importante debido a cómo Docker
 # interactua con el contenedor al ejecutar Ctrl + C (Gracefull Exit).

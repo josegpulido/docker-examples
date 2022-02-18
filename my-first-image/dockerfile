@@ -11,4 +11,7 @@ FROM ubuntu:latest
 
 # Ejecutando un comando. RUN se ejecuta en tiempo de build, es decir,
 # la imagen se creará con los comandos ya ejecutados.
+# 
+# En este caso, al arrancar el contenedor se creará un archivo
+# llamado hello-world.txt en el directorio /usr/src
 RUN touch /usr/src/hello-world.txt
