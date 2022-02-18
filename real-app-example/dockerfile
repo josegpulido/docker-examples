@@ -44,7 +44,7 @@ EXPOSE 3000
 
 # Establece el comando por sobre el que correrá el
 # contenedor permanentemente
-CMD ["npm", "run", "start"]
+CMD npm run start
 
 # En modo de desarrollo, interesa que nodemon se ejecute
 # para poder rebuildear en tiempo real la imagen de Docker
@@ -57,7 +57,7 @@ CMD ["npm", "run", "start"]
 
 # SHELL FORM vs EXEC FORM
 # El sig. formato es corrido por Docker como un comando hijo del
-# shell (es decir, como si fuese $ bash -c <my_command>):
+# shell (es decir, como si fuese $ /bin/sh -c <my_command>):
 # + SHELL FORM:
 # --> CMD npm run start
 # 
