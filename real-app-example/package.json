@@ -8,7 +8,7 @@
     "serve": "nodemon .",
     "start": "node .",
     "docker:image:build": "docker build -t josegpulido/node:real-app-example .",
-    "docker:run:serve": "docker run --rm -p 3000:3000 -v $()/index.js josegpulido/node:real-app-example"
+    "docker:run:serve": "docker run --rm -p 3000:3000 -v $(pwd)/index.js josegpulido/node:real-app-example"
   },
   "author": "José Pulido <memo.board.9999@gmail.com>",
   "license": "ISC",
