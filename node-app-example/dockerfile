@@ -67,7 +67,7 @@ CMD npm run start
 # --> CMD ["npm", "run", "start"]
 
 # Lo anterior se puede comprobar buildeando la imagen con ambos
-# comandos y ejecutando el comando $ docker exec <container_name> ps -ef
+# comandos y ejecutando el comando $ docker exec <container-name> ps -ef
 # sobre el contenedor corriendo. Entonces podrá notarse que:
 # 
 # - En SHELL FORM, el comando se presenta como un hijo del proceso de

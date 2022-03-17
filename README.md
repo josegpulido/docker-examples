@@ -11,4 +11,4 @@ Ordenadas de menor a mayor dificultad.
     - Conectando dos contenedores a través de una red virtual local.
 - **/executable-image**. Creando una imagen que pueda crear contenedores ejecutables.
     - ENTRYPOINT vs CMD.
-- **/multi-stage**. Creando dos tipos de imágenes distintas dependiendo del entorno deseado (producción o desarrollo).
+- **/multi-stage**. Docker Compose en entornos multi-stage.

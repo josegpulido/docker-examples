@@ -13,9 +13,9 @@ FROM node:12
 # En un contenedor ejecutable (executable container), el contenedor encenderá solamente al especificar
 # un comando durante su arranque o con la herramienta "$ docker exec". Suponiendo que aún se desea
 # hacer una operación de ping, considerar el sig. ej:
-# --> $ docker run -d <image_name> hostname
+# --> $ docker run -d <image-name> hostname
 # o
-# --> $ docker exec <container_name> hostname
+# --> $ docker exec <container-name> hostname
 # Donde $ hostname es un comando de Linux que retorna el nombre del host actual.
 
 # Para lograr hacer que Docker tome el comando y lo vacie como argumento del "comando base", entonces
@@ -27,6 +27,6 @@ CMD [ "google.com" ]
 # En este caso, si no se arranca o ejecuta un comando para el contenedor, este
 # ejecutará $ ping -c 3 google.com, y sino:
 # 
-# $ docker run -d <image_name> hostname --> $ ping -c 3 $(hostname) --> $ ping -c 3 my-cont-hostname-1
+# $ docker run -d <image-name> hostname --> $ ping -c 3 $(hostname) --> $ ping -c 3 my-cont-hostname-1
 # o
-# $ docker exec <image_name> facebook.com --> $ ping -c 3 facebook.com
+# $ docker exec <image-name> facebook.com --> $ ping -c 3 facebook.com
