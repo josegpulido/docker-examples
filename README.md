@@ -9,5 +9,6 @@ Ordenadas de menor a mayor dificultad.
     - Comando de arranque: SHELL FORM vs EXEC FORM.
     - Montando Named Volume y Bind Mount para reflejar el directorio de trabajo con el directorio del contenedor.
     - Conectando dos contenedores a través de una red virtual local.
-- **/entry-point**. Creando una imagen ejecutable (a diferencia de una autoejecutable como los ejercicios anteriores).
+- **/executable-image**. Creando una imagen que pueda crear contenedores ejecutables.
+    - ENTRYPOINT vs CMD.
 - **/multi-stage**. Creando dos tipos de imágenes distintas dependiendo del entorno deseado (producción o desarrollo).
