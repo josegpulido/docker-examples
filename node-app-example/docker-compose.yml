@@ -3,7 +3,7 @@
 # networks o configuraciones de los mismos contenedores.
 # 
 # Documentación sobre la sintaxis de Docker Compose:
-# + https://docs.docker.com/compose/compose-file/compose-file-v2/#command
+# + https://docs.docker.com/compose/compose-file/compose-file-v3/
 
 # Versión del Docker Compose
 version: "3.8"
@@ -63,11 +63,11 @@ services:
     # 
     # Siendo options los permisos de lectura y escritura (...:rw) por defecto.
     # 
-    # A partir de la versión 2.3 de docker-compose.yml, ahora "volumes" también soporta una estructura
+    # A partir de la versión 3.2 de docker-compose.yml, ahora "volumes" también soporta una estructura
     # de configuración más robusta que permite trabajar además con tmpfs o npipe.
     # 
     # Más información:
-    # + https://docs.docker.com/compose/compose-file/compose-file-v2/#long-syntax
+    # + https://docs.docker.com/compose/compose-file/compose-file-v3/#long-syntax-3
     volumes:
       - .:/usr/src # <-- Monta el directorio actual (.) en el directorio /usr/src del contenedor
       - /usr/src/node_modules # <-- La forma </container-dir> le indica a Docker crear un volúmen por nosotros

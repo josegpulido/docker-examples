@@ -6,7 +6,7 @@
     "build": "tsc index.ts --outDir dist",
     "start": "echo \"Running prod mode...\n\" && node .",
     "serve": "echo \"Running dev mode...\n\" && nodemon",
-    "test": "echo \"tested successfully!\"",
+    "test": "echo \"Running tests...\"",
     "docker:serve": "docker build -t josegpulido/multi-stage:development -f ./docker/development.dockerfile . && docker run --rm --name multi_stage_dev -v multi_stage_dev_vol:/usr/src:rw josegpulido/multi-stage:development && docker logs -f multi_stage_dev",
     "docker:start": "npm run build && docker build -t josegpulido/multi-stage:production -f ./docker/production.dockerfile . && docker run --rm --name multi_stage_prod -v multi_stage_prod_vol:/usr/src:rw josegpulido/multi-stage:production && docker logs -f multi_stage_prod"
   },

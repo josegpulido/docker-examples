@@ -7,6 +7,9 @@
 
 # Todo dockerfile está basada en una imagen de base, como por ejemplo
 # Debian, Red Hat, Node, nginx etc.
+# 
+# Más sobre sintaxis de dockerfile:
+# + https://docs.docker.com/engine/reference/builder/
 FROM ubuntu:latest
 
 # Ejecutando un comando.
