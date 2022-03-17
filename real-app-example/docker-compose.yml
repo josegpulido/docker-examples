@@ -1,41 +1,50 @@
-# Nota importante:
-# Docker Compose no está diseñado para buildear imágenes, por
-# lo que ese proceso aún se puede seguir automatizando a
-# través de NPM scripts.
+# Docker Compose no está diseñado para buildear imágenes, sino para desplegar
+# configuraciones en entornos multi contenedor, como montaje de volúmenes,
+# networks o configuraciones de los mismos contenedores.
 # 
-# Ver apuntes para complementar información.
+# Documentación sobre la sintaxis de Docker Compose:
+# + https://docs.docker.com/compose/compose-file/compose-file-v2/#command
 
 # Versión del Docker Compose
 version: "3.8"
 
-# Un servicio ("service") puede contener uno o más contenedores de la misma
-# imagen. Esta entidad puede utilizar un dockerfile existente o definir una
-# imagen dentro del bloque mismo.
+# Un servicio ("service") puede definir la configuración de uno o más contenedores.
+# Esta entidad puede utilizar un dockerfile existente o definir el mismo
+# la configuración de una imagen nueva, es decir, como si tuviera un dockerfile
+# embebido.
+# 
+# Toda la configuración aquí declarada será desplegada y puesta en marcha mediante la
+# invocación del comando $ docker-compose, lo cual sirve a su propósito de poder desplegar
+# de forma fácil configuraciones complicadas de múltiples contenedores en entornos que lo
+# necesitan.
 services:
 
-  # Nombre del contenedor, en este caso "my-db"
+  # Nombre del contenedor 1, en este caso "my-db"
   my-db:
     # Imagen base del contenedor (inmutable)
     image: mongo
 
+  # Nombre del contenedor 2
   my-app:
 
     # En lugar de usar una imagen inmutable base de forma directa, Docker
-    # puede buildear la imagen cada vez que el Compose se arranque a partir
+    # puede buildear la imagen cada vez que el Docker Compose arranque a partir
     # de un contexto en el que se ubique un dockerfile.
     build: . # <-- Pasandole el directorio actual (.) como contexto
 
-    # Valores a exportar como variables de entorno
+    # Valores a exportar como variables de entorno en shell. Pueden definirse
+    # como una lista o como un diccionario, siendo el sig. caso un diccionario:
     environment:
-      MONGO_URL: "mongodb://my-db:27017/test"
+      MONGO_URL: mongodb://my-db:27017/test
 
-    # Le indica a docker que si el contenedor "my-db" no arranca, entonces
-    # tampoco arrancar a este contenedor. También le permite establecer un
-    # orden de ejecución entre todos los contenedores, arrancando a este
+    # "depends_on" le indicará a Docker que evite arrancar este contenedor si
+    # el contenedor "my-db" no está en corriendo. Lo anterior establece entonces
+    # un orden de ejecución entre todos los contenedores, arrancando a este
     # contenedor después de "my-db".
     depends_on:
       - my-db
 
+    # Lista de puertos a exponer según la figura sintáctica HOST:CONTAINER
     ports:
       - "3000:3000"
       # Al escalar servicios mediante Docker Compose con el flag --scale, será necesario
@@ -43,23 +52,33 @@ services:
       # puerto de cada servicio. Por ejemplo, dos contenedores que expongan su puerto 3000, pero
       # que para acceder al primero se conecte a host:3000 y para el segundo se conecte con host:3001:
       - "3000-3001:3000"
-      # En dicho caso, luego habrá que configurar balanceadores de cargas para utilizar ambos servicios
-      # en un solo entrypoint.
+      # En dicho caso, luego habrá que configurar balanceadores de cargas para utilizar ambos
+      # servicios en un solo entrypoint.
 
-    # Montando un volúmen en la imagen para que cada vez que se corra un contenedor basado en
-    # dicha imagen, este escuche y refleje los cambios que ocurren en el directorio actual (.)
-    # hacia /usr/src.
-    volumes: 
+    # "volumes" define una lista de volúmenes a montar sobre este contenedor. Dependiendo de la sintaxis
+    # utilizada puede montar un Named Volume o un Bind Mount. Utiliza la misma figura sintáctica que al
+    # montar un volúmen sobre un contenedor directamente con Docker:
+    # 
+    #                     </host-dir or volume-name>:</container-dir>:[options]
+    # 
+    # Siendo options los permisos de lectura y escritura (...:rw) por defecto.
+    # 
+    # A partir de la versión 2.3 de docker-compose.yml, ahora "volumes" también soporta una estructura
+    # de configuración más robusta que permite trabajar además con tmpfs o npipe.
+    # 
+    # Más información:
+    # + https://docs.docker.com/compose/compose-file/compose-file-v2/#long-syntax
+    volumes:
       - .:/usr/src # <-- Monta el directorio actual (.) en el directorio /usr/src del contenedor
-      - /usr/src/node_modules # <-- Ignorar montar el directorio de /node_modules en el volúmen
-      # Lo anterior porque la imagen que se buildea (my-app) y su dockerfile establece que la imagen
-      # no hará RUN NPM INSTALL si no detectó cambios recientes al crear la imagen (consulta de caché),
-      # y cuando se rebuildee, el caché dirá que no hay cambios cuando en realidad todo el volúmen
-      # completo volvió a montarse desde cero.
+      - /usr/src/node_modules # <-- La forma </container-dir> le indica a Docker crear un volúmen por nosotros
+      # La línea anterior es común usarla en ambientes de desarrollo en donde quizá se instalen o borren
+      # dependencias que afecten al directorio /node_modules el cual suele ocupar mucho espacio en el orden
+      # incluso de los gigas. Montando un volúmen sobre este directorio le ayuda a Docker a colocar el
+      # directorio /node_modules de forma fácil cuando el dockerfile ya ha detectado que puede reutilizar
+      # el caché. Básicamente, esta optimización reduce el tiempo en que Docker ejecuta este contenedor.
 
-    # Por último, cuando el contenedor detecte que los archivos del directorio /usr/src cambien, entonces
-    # el servidor de Express se vuelva a iniciar (nodemon). Para lograr lo anterior, es conveniente
-    # configurar un script de NPM que corra a nodemon, y que dicho script corra apenas arranque el
-    # contenedor.
+    # "command" define el comando que el contenedor utilizará como proceso principal. En este caso, el
+    # script serve del package.json inicia nodemon: proceso que se mantendrá observando en tiempo real
+    # los cambios del directorio actual (.).
     command: "npm run serve"
     

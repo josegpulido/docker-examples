@@ -1,7 +1,6 @@
 {
   "name": "multi-stage",
   "version": "1.0.0",
-  "description": "Project with dev and prod stages to build different images with Docker c:",
   "main": "./dist/index.js",
   "scripts": {
     "build": "tsc index.ts --outDir dist",
@@ -11,8 +10,7 @@
     "docker:serve": "docker build -t josegpulido/multi-stage:development -f ./docker/development.dockerfile . && docker run --rm --name multi_stage_dev -v multi_stage_dev_vol:/usr/src:rw josegpulido/multi-stage:development && docker logs -f multi_stage_dev",
     "docker:start": "npm run build && docker build -t josegpulido/multi-stage:production -f ./docker/production.dockerfile . && docker run --rm --name multi_stage_prod -v multi_stage_prod_vol:/usr/src:rw josegpulido/multi-stage:production && docker logs -f multi_stage_prod"
   },
-  "author": "José Pulido <memo.board.9999@gmail.com>",
-  "license": "ISC",
+  "author": "José Guillermo <memo.board.9999@gmail.com>",
   "devDependencies": {
     "nodemon": "^2.0.12",
     "ts-node": "^10.2.1"

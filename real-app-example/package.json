@@ -1,17 +1,15 @@
 {
 
-  "name": "real-app-example",
+  "name": "node-app-example",
   "version": "1.0.0",
-  "description": "Simple app to handle with docker :)",
   "main": "index.js",
   "scripts": {
-    "serve": "nodemon .",
     "start": "node .",
-    "docker:image:build": "docker build -t josegpulido/node:real-app-example .",
-    "docker:run:serve": "docker run --rm -p 3000:3000 -v $(pwd)/index.js josegpulido/node:real-app-example"
+    "serve": "nodemon .",
+    "docker:build": "docker build -t josegpulido/node:node-app-example .",
+    "docker:serve": "docker run --rm -p 3000:3000 -v $(pwd)/index.js josegpulido/node:node-app-example"
   },
-  "author": "José Pulido <memo.board.9999@gmail.com>",
-  "license": "ISC",
+  "author": "José Guillermo <memo.board.9999@gmail.com>",
   "dependencies": {
     "express": "^4.17.1"
   },

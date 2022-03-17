@@ -3,8 +3,8 @@
 Ordenadas de menor a mayor dificultad.
 
 ### Indice
-- **/my-first-image**. Creando una imagen por primera vez.
-- **/real-app-example**. Introducción a Docker Compose.
+- **/my-first-image**. Creando una imagen.
+- **/node-app-example**. Introducción a Docker Compose.
     - Comando de arranque: SHELL FORM vs EXEC FORM.
     - Montando volúmen para reflejar el directorio de trabajo con el directorio del contenedor.
     - Conectando dos contenedores a través de una red virtual local.
