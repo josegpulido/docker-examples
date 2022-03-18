@@ -1,0 +1,30 @@
+# Este archivo permite definir una lista de directorios y archivos
+# que deseamos que Docker ignore durante el buildeo de una imagen.
+# Puede ser útil, p. ej., para reducir el tamaño final de la imagen,
+# optimizar el proceso de building de la imagen al omitir directorios
+# muy pesados que se generarán dentro del mismo run-time como /node_modules,
+# o también para evitar buildear en la imagen información sensible como
+# archivos con variables de entorno, secretos, etc.
+# 
+# Aunque menos común, este archivo también se usa para ignorar al
+# dockerfile mismo con el propósito de evitar los usuarios de imágenes
+# públicas tengan acceso a este archivo por una razón en específico.
+# 
+# Debe ubicarse en el mismo directorio que el archivo dockerfile.
+# A Marzo 2022, Docker aún no soporta múltiples archivos .dockerignore
+# o especificar la ruta de este.
+
+# Ignorar el archivo example.txt
+example.txt
+
+# Ignorar todos los archivos que contengan la extensión .cpp
+*.cpp
+
+# Ignorar todos los archivos y directorios de un subdirectorio
+src/my-files/**
+
+# Ignorar todo excepto el archivo my-script.sh
+!my-script.sh
+
+# Ignorar todo excepto el directorio utils
+!utils

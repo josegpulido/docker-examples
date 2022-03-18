@@ -9,6 +9,7 @@ Ordenadas de menor a mayor dificultad.
     - Comando de arranque: SHELL FORM vs EXEC FORM.
     - Montando Named Volume y Bind Mount para reflejar el directorio de trabajo con el directorio del contenedor.
     - Conectando dos contenedores a través de una red virtual local.
+    - Usos deñ archivo .dockerignore.
 - **/executable-image**. Creando una imagen que pueda crear contenedores ejecutables.
     - ENTRYPOINT vs CMD.
 - **/multi-stage**. Configuración de entorno de desarrollo y producción en Docker. Creación de imágenes por etapas múltiples (multi-stage).
