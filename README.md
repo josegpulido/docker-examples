@@ -13,3 +13,4 @@ Ordenadas de menor a mayor dificultad.
 - **/executable-image**. Creando una imagen que pueda crear contenedores ejecutables.
     - ENTRYPOINT vs CMD.
 - **/multi-stage**. Configuración de entorno de desarrollo y producción en Docker. Creación de imágenes por etapas múltiples (multi-stage).
+    - Archivos dockerfile y .dockerignore en entornos de desarrollo y producción.

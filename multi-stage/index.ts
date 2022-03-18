@@ -1,6 +1,6 @@
 
 let counter:number = 0;
-const max:number = 10;
+const max:number = 50;
 
 const interval = setInterval(() => {
     counter++;
