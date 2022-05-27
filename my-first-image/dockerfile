@@ -17,6 +17,6 @@ FROM ubuntu:latest
 # RUN se ejecuta en tiempo de build de la imagen, es decir
 # los comandos de shell escritos en esta sentencia se ejecutarán
 # mientras la imagen está siendo construida, y en consecuencia
-# preservará los efectos que tenga dicho comando sobre el sistema
-# operativo a correr, que en este caso es la creación de un achivo.
+# preservará los cambios generados en cualquier contenedor que utiliza
+# esta imagen, que en este caso es la creación de un achivo.
 RUN touch /usr/src/hello-world.txt

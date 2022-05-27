@@ -39,11 +39,14 @@ RUN npm install
 # línea 15 y este, así que los omite
 COPY [".", "/usr/src/"]
 
-# Expone el puerto 3000 en el contenedor
+# Expone el puerto 3000 únicamente en el contenedor, mas
+# no en la máquina anfitriona. Pueden definirse puertos
+# en específico (3000 3001 3002) o un rango completo de
+# puertos (3000-3005)
 EXPOSE 3000
 
-# Establece el comando por sobre el que correrá el
-# contenedor permanentemente
+# Establece el comando por sobre el que correrá cualquier
+# instancia de la imagen, es decir, el contenedor
 CMD npm run start
 
 # En modo de desarrollo, interesa que nodemon se ejecute

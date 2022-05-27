@@ -29,7 +29,8 @@ services:
 
     # En lugar de usar una imagen inmutable base de forma directa, Docker
     # puede buildear la imagen cada vez que el Docker Compose arranque a partir
-    # de un contexto en el que se ubique un dockerfile.
+    # de un contexto en el que se ubique un dockerfile, aunque esto no es una
+    # buena práctica porque vuelve al archivo innecesariamente más verboso.
     build: . # <-- Pasandole el directorio actual (.) como contexto
 
     # Valores a exportar como variables de entorno en shell. Pueden definirse
