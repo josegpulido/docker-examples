@@ -5,18 +5,21 @@
 # Por cada sentencia escrita (RUN, WORKDIR, etc.) se está creando
 # una capa nueva en la imagen.
 
-# Todo dockerfile está basada en una imagen de base, como por ejemplo
-# Debian, Red Hat, Node, nginx etc.
+# Un dockerfile siempre comenzará indicando a través de su sentencia FROM una
+# imagen existente cualquiera que utilizará como base, como por ejemplo Debian,
+# Red Hat, Node, nginx etc.
 # 
 # Más sobre sintaxis de dockerfile:
 # + https://docs.docker.com/engine/reference/builder/
 FROM ubuntu:latest
 
-# Ejecutando un comando.
+# Ejecutando un comando...
 # 
-# RUN se ejecuta en tiempo de build de la imagen, es decir
-# los comandos de shell escritos en esta sentencia se ejecutarán
-# mientras la imagen está siendo construida, y en consecuencia
-# preservará los cambios generados en cualquier contenedor que utiliza
-# esta imagen, que en este caso es la creación de un achivo.
+# La sentencia RUN ejecuta un comando cualquiera en tiempo de build (momento en
+# que una imagen está siendo construida) utilizando la shell de la imagen
+# en cuestión, es decir, para una imagen de Linux utilizaría una shell bash o
+# similares, mientras que en una imagen de Windows utilizaría PowerShell.
+# 
+# En este caso en particular, la sentencia RUN está ejecutando un comando que
+# creará un archivo llamado hello-world.txt en el directorio /usr/src/.
 RUN touch /usr/src/hello-world.txt
