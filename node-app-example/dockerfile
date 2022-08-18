@@ -7,15 +7,25 @@
 # se podrán generar bugs y comportamiento indeseado.
 FROM node:12
 
-# Copiar primero los package de las depedencias, porque
+# La sentencia COPY permite copiar elementos de N ubicaciones
+# de la máquina anfitriona, todo hacia el destino del contenedor
+# indicado en el último parámetro, bien como ruta absoluta o bien
+# como ruta relativa a WORKDIR. En el siguiente caso, se copiarán
+# dos archivos hacia la ruta absoluta /usr/src/ del contenedor.
+# 
+# Copiando primero los package de las depedencias, porque
 # de ello dependerá si Docker detecta cambios en dichos
 # ficheros y entonces decidirá si reciclar o no la capa
-# posiblemente cacheada de RUN npm install.
-# 
-# COPY acepta N elementos, y al final la ruta destino.
+# posiblemente cacheada de RUN npm install
 COPY ["package.json", "package-lock.json", "/usr/src/"]
 
-# Ubica a Docker en el directorio /usr/src
+# WORKDIR ubica a Docker en el directorio /usr/src, es decir,
+# ubica un directorio de trabajo para otras directivas como COPY,
+# RUN, ENTRYPOINT, etc.
+# 
+# Es posible utilizar múltiples sentencias WORKDIR siempre tomando
+# en cuenta que al ingresar a la consola interactiva este tomará como
+# directorio de trabajo el último WORKDIR ejecutado.
 WORKDIR /usr/src
 
 # Instala las dependencias del proyecto. Reciclará esta
@@ -30,23 +40,40 @@ WORKDIR /usr/src
 # Ver apuntes de NPM para complementar.
 RUN npm install
 
-# Copia todos los archivos del directorio donde se
+# Copiando todos los archivos del directorio donde se
 # encuentra el contexto de Docker (dockerfile) hacia
 # la ruta especificada.
 # 
 # Docker no reescribirá los package.json porque ya se
 # dio cuenta que no hay cambios entre el COPY de la
-# línea 15 y este, así que los omite
+# línea 15 y este, así que los omite.
+# 
+# La sentencia COPY también admite metacaracteres, como por ejemplo
+# copiar todos los archivos que terminen con la extensión .js:
+# --> COPY ["*.js", "/usr/src/"]
 COPY [".", "/usr/src/"]
+# 
+# La setencia ADD trabaja de la misma forma que COPY, con dos excepciones
+# básicas importantes:
+# 1. Poder copiar archivos empaquetados .tar desde la máquina anfitriona
+# y servirlos desempaquetados en el contenedor, p. ej:
+# --> ADD ["my_file.tar", "/usr/src/"]
+# 2. Descargar un archivo desde la web mediante un URL y copiarlo en
+# el contenedor, p. ej:
+# --> ADD ["https://any-web.com/path/to/file.txt", "/usr/src/"]
 
-# Expone el puerto 3000 únicamente en el contenedor, mas
-# no en la máquina anfitriona. Pueden definirse puertos
-# en específico (3000 3001 3002) o un rango completo de
-# puertos (3000-3005)
+# La directiva EXPOSE permite exponer el puerto 3000
+# únicamente en el contenedor, mas no en la máquina anfitriona.
+# Puede indicarse puertos en específico (3000 3001 3002) o un
+# rango completo de puertos (3000-3005).
 EXPOSE 3000
 
-# Establece el comando por sobre el que correrá cualquier
-# instancia de la imagen, es decir, el contenedor
+# La directiva CMD establece el comando por sobre el cuál
+# correrá cualquier instancia de la imagen, es decir, el
+# contenedor.
+# 
+# Solo puede existir una sentencia CMD, y de haber varias,
+# el contenedor tomará la última encontrada.
 CMD npm run start
 
 # En modo de desarrollo, interesa que nodemon se ejecute
@@ -79,3 +106,26 @@ CMD npm run start
 # - En EXEC FORM, al ser un proceso más del contenedor entonces
 # entiende el SIGTERM directamente. Esto es importante debido a cómo Docker
 # interactua con el contenedor al ejecutar Ctrl + C (Gracefull Exit).
+
+# La sentencia ENV permite definir una variable de entorno que pueda
+# utilizarse desde el dockerfile y que esté disponible de la misma manera
+# en las variables del contenedor.
+ENV myvar=10
+ENV myvar2=othervalue myvar3=15+${myvar}
+
+# La sentencia ARG es muy similar a ENV, con la diferencia de que permite
+# asignar valor a una variable que será aprovechada únicamente durante
+# la construcción de la imagen, pero no para el contenedor en tiempo de
+# ejecución. Además, ARG no se inicializa a diferencia de ENV, que sí
+# tiene un valor por defecto inicial, pero Docker lanzará un error en caso
+# de omitir asignarle un valor mediante CLI (--build-arg VAR_NAME=VALUE).
+ARG myArgName
+# --> $ docker build -t <image-name> --build-arg VAR_NAME=VALUE .
+
+# La directiva VOLUME permite definir un volúmen de Docker del tipo
+# Bind Mount al que podrá montarse un contenedor, montando el
+# directorio correspondiente al contexto del dockerfile. Cada contenedor
+# que se arranque montará su propio volúmen de forma independiente a menos
+# que los demás contenedores apunten al contenedor con el volúmen original
+# al momento de arrancar mediante el argumento --volumes-from.
+VOLUME [ "/dir/in/container" ]

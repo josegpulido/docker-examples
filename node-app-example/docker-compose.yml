@@ -4,25 +4,74 @@
 # 
 # Documentación sobre la sintaxis de Docker Compose:
 # + https://docs.docker.com/compose/compose-file/compose-file-v3/
-
+# 
 # Versión del Docker Compose
-version: "3.8"
+# 
+# En versiones recientes de Compose, la sentencia "version" ya no es 
+# necesaria.
+version: "3.9"
 
-# Un servicio ("service") puede definir la configuración de uno o más contenedores.
-# Esta entidad puede utilizar un dockerfile existente o definir el mismo
+# Un servicio puede definir la configuración de uno o más contenedores con determinadas
+# características. Aquí, se puede utilizar un dockerfile existente o definir aquí mismo
 # la configuración de una imagen nueva, es decir, como si tuviera un dockerfile
 # embebido.
 # 
-# Toda la configuración aquí declarada será desplegada y puesta en marcha mediante la
-# invocación del comando $ docker-compose, lo cual sirve a su propósito de poder desplegar
-# de forma fácil configuraciones complicadas de múltiples contenedores en entornos que lo
-# necesitan.
+# Toda la configuración declarada en la sentencia "services" será desplegada y puesta en
+# marcha mediante la invocación del comando $ docker-compose up (v1) o $ docker compose up (v2),
+# lo que desplegará de forma fácil y sencilla configuraciones complicadas de múltiples
+# contenedores en entornos que así lo requieran. Además, como comportamiento por defecto, Compose
+# crea una red virtual de tipo bridge por el que podrán comunicarse los contenedores, ya que no
+# es recomendable utilizar la red bridge que viene con Docker por defecto.
 services:
 
   # Nombre del contenedor 1, en este caso "my-db"
   my-db:
     # Imagen base del contenedor (inmutable)
     image: mongo
+
+    # Los perfiles son una característica de Docker Compose que permite
+    # clasificar servicios por etiquetas que puedan invocarse según se necesite.
+    # Esta práctica es común, p. ej., definiendo servicios y/o el comportamiento
+    # de los mismos como etapas dev, stage y prod con el propósito de desplegar
+    # un perfil u otro según se desee.
+    # 
+    # Los servicios que no especifiquen esta sentencia arrancarán sin importar
+    # qué perfil se haya seleccionado durante el arránque. Los perfiles se
+    # seleccionan durante el arranca mediante el argumento --profile del comando
+    # 
+    # --> $ docker-compose --profile <profile-name> up
+    # 
+    profiles:
+      - dev
+      - otro_stage
+    
+    # La sentencia "command" tiene una función similar a la del operando final del
+    # comando $ docker run <image-name> <command> […<args>], ya que permite definir
+    # un comando a ejecutar en el contenedor como PID 1 o por una shell intermedia
+    # dependiendo del estilo definido en el dockerfile, es decir, un comando que
+    # reemplace el CMD o el ENTRYPOINT de la imagen según sea el caso. Ver apuntes
+    # de "Docker : dockerfile : ENTRYPOINT vs CMD" para complementar.
+    # 
+    # Este comando utiliza un string para representar el SHELL FORM
+    # --> command: echo hello
+    # O un formato de lista para representar EXEC FORM
+    # --> command: ["echo", "hello"]
+    command: echo "Prueba de sentencia command!"
+
+    # Las siguientes sentencias corresponden al control de parámetros de hardware
+    # de cada contenedor que se hacía de forma individual mediante el
+    # comando $ docker run ...
+    cpu_count: 1
+    cpu_shares: 512
+    mem_limit: 100m
+
+    # La sentencia "restart" permite definir el comportamiento de los contenedores
+    # cuando abortan debido a un problema. Ver Docker : Container : Política de rebote
+    # para complementar.
+    # 
+    # Valores permitidos:
+    # unless-stoped | always | on-failure[:max-retries] | "no"
+    restart: on-failure:2
 
   # Nombre del contenedor 2
   my-app:
@@ -33,13 +82,20 @@ services:
     # buena práctica porque vuelve al archivo innecesariamente más verboso.
     build: . # <-- Pasandole el directorio actual (.) como contexto
 
-    # Valores a exportar como variables de entorno en shell. Pueden definirse
-    # como una lista o como un diccionario, siendo el sig. caso un diccionario:
+    # Diccionario de valores a exportar como variables de entorno en shell.
+    # Este y muchos otras sentencias admiten tanto listas como diccionarios, siempre
+    # apegandose a la sintaxis soportada por YAML.
     environment:
       MONGO_URL: mongodb://my-db:27017/test
+    
+    # La sentencia "env_file" permite definir una ruta absoluta o relativa que
+    # contenga un archivo de variables de entorno (figura sintáctica KEY=VALUE). Al igual
+    # que la sentencia "environment", estas variables se dejan en la shell del servicio.
+    env_file:
+      - ./environment/environment.dev
 
-    # "depends_on" le indicará a Docker que evite arrancar este contenedor si
-    # el contenedor "my-db" no está en corriendo. Lo anterior establece entonces
+    # La sentencia "depends_on" le indicará a Docker que evite arrancar este contenedor
+    # si el contenedor "my-db" no está en corriendo. Lo anterior establece entonces
     # un orden de ejecución entre todos los contenedores, arrancando a este
     # contenedor después de "my-db".
     depends_on:
@@ -51,35 +107,65 @@ services:
       # Al escalar servicios mediante Docker Compose con el flag --scale, será necesario
       # indicarle a Docker que distintos puertos de la máquina anfitriona apuntarán a un mismo
       # puerto de cada servicio. Por ejemplo, dos contenedores que expongan su puerto 3000, pero
-      # que para acceder al primero se conecte a host:3000 y para el segundo se conecte con host:3001:
-      - "3000-3001:3000"
+      # que para acceder al primero se conecte a HOST:3000 y para el segundo se conecte con HOST:3001:
+      - "4000-4001:4000"
       # En dicho caso, luego habrá que configurar balanceadores de cargas para utilizar ambos
       # servicios en un solo entrypoint.
 
     # "volumes" define una lista de volúmenes a montar sobre este contenedor. Dependiendo de la sintaxis
-    # utilizada puede montar un Named Volume o un Bind Mount. Utiliza la misma figura sintáctica que al
-    # montar un volúmen sobre un contenedor directamente con Docker:
+    # utilizada puede montar un Named Volume, Bind Mount, Named Pipe o tmpfs, estos últimos dos soportados
+    # desde la versión 3.2 de Compose. Utiliza la misma figura sintáctica que al montar un volúmen sobre
+    # un contenedor directamente con Docker:
     # 
     #                     </host-dir or volume-name>:</container-dir>:[options]
     # 
     # Siendo options los permisos de lectura y escritura (...:rw) por defecto.
     # 
-    # A partir de la versión 3.2 de docker-compose.yml, ahora "volumes" también soporta una estructura
-    # de configuración más robusta que permite trabajar además con tmpfs o npipe.
-    # 
     # Más información:
     # + https://docs.docker.com/compose/compose-file/compose-file-v3/#long-syntax-3
     volumes:
-      - .:/usr/src # <-- Monta el directorio actual (.) en el directorio /usr/src del contenedor
-      - /usr/src/node_modules # <-- La forma </container-dir> le indica a Docker crear un volúmen por nosotros
-      # La línea anterior es común usarla en ambientes de desarrollo en donde quizá se instalen o borren
+      # Bind Mount: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # Monta el directorio actual (.) en el directorio /usr/src del contenedor
+      - .:/usr/src
+      # Named Volume: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      # Monta un volúmen de Docker sobre un directorio en específico ubicado en el
+      # contenedor, y utiliza como nombre su propio uid en caso de no especificarlo, o con un nombre
+      # específico como es el caso.
+      # 
+      # Este ejemplo en particular es útil en ambientes de desarrollo en donde quizá se instalen o borren
       # dependencias que afecten al directorio /node_modules el cual suele ocupar mucho espacio en el orden
       # incluso de los gigas. Montando un volúmen sobre este directorio le ayuda a Docker a colocar el
       # directorio /node_modules de forma fácil cuando el dockerfile ya ha detectado que puede reutilizar
       # el caché. Básicamente, esta optimización reduce el tiempo en que Docker ejecuta este contenedor.
+      - my_named_volume:/usr/src/node_modules
+    
+    # Lista de redes a utilizar por este servicio.
+    networks:
+      - my_custom_network
 
     # "command" define el comando que el contenedor utilizará como proceso principal. En este caso, el
     # script serve del package.json inicia nodemon: proceso que se mantendrá observando en tiempo real
     # los cambios del directorio actual (.).
     command: "npm run serve"
-    
+
+# La sentencia "volumes" fuera del scope de los servicios permite definir
+# volúmenes que puedan ser utilizados a nivel global, es decir, por todos
+# los servicios del proyecto.
+volumes:
+  # Al definir un nombre de volúmen existente, en este caso creado por el
+  # servicio my-app, Docker evita crearlo o sobrescribirlo y apunta a dicho
+  # volúmen cambiando únicamente su scope a global.
+  # 
+  # Recordar que Docker tomará como prefijo del nombre del volúmen el nombre
+  # del directorio en el que el contexto de Compose se ubica, p. ej.,
+  # <host-dir-name>_<volume-name>
+  # mydir_my_named_volume
+  # Este comportamiento por defecto puede corregirse con el argumento (-p).
+  my_named_volume:
+
+# La sentencia "networks" permite definir redes de Docker que puedan compartir
+# múltiples servicios entre sí. Solo hace falta definir aquí el nombre de la red
+# y colocar ese mismo nombre bajo la sentencia "networks" de cada servicio en
+# donde se desea utilizar la red.
+networks:
+  my_custom_network:

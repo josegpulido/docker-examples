@@ -3,7 +3,9 @@
 # imagen.
 # 
 # Por cada sentencia escrita (RUN, WORKDIR, etc.) se está creando
-# una capa nueva en la imagen.
+# una capa nueva en la imagen. En sentencias como RUN, Docker incluso
+# crea contenedores temporales que corran la imagen base y ejecuten los
+# comandos indicados para luego destruir dicho contenedor.
 
 # Un dockerfile siempre comenzará indicando a través de su sentencia FROM una
 # imagen existente cualquiera que utilizará como base, como por ejemplo Debian,
@@ -22,4 +24,16 @@ FROM ubuntu:latest
 # 
 # En este caso en particular, la sentencia RUN está ejecutando un comando que
 # creará un archivo llamado hello-world.txt en el directorio /usr/src/.
+# 
+# La construicción de la imagen fallará cuando se trate de ejecutar un comando
+# interactivo, es decir, un comando que requiere de la interacción de un usuario,
+# como por ejemplo
+# 
+#                       $ apt install some-package
+# 
+# , el cual siempre solicita la confirmación de instalación, en cuyo caso habrá que
+# reemplazar por
+# 
+#                     $ apt install -y some-package
+# 
 RUN touch /usr/src/hello-world.txt
